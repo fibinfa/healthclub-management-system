@@ -1,17 +1,23 @@
-server:
-  port: 8080
 spring:
-  application:
-    name: health-club
+  profiles:
+    active: "dev"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3306/user
-    username: user
+    username: root
     password: password
   jpa:
     hibernate:
       ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
-        format_sql: true
     show-sql: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
