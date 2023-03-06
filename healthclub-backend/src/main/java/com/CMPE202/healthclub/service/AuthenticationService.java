@@ -14,6 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class AuthenticationService {
@@ -27,12 +30,19 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse registerUser(UserModel userModel) {
-        User user = new User();
-        user.setEmail(userModel.getEmail());
-        user.setFirstName(userModel.getFirstName());
-        user.setLastName(userModel.getLastName());
-        user.setPassword(passwordEncoder.encode(userModel.getPassword()));
-        user.setRole(ROLE.USER);
+        // Check if email already exists
+        String email = userModel.getEmail();
+        Optional<User> optionalUser = userRepository.findUserByEmail(email);
+        if(optionalUser.isPresent()) {
+            throw new IllegalArgumentException("Email already registered");
+        }
+        User user = User.builder()
+                .email(userModel.getEmail())
+                .firstName(userModel.getFirstName())
+                .lastName(userModel.getLastName())
+                .role(userModel.getRole())
+                .password(passwordEncoder.encode(userModel.getPassword()))
+                .build();
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);

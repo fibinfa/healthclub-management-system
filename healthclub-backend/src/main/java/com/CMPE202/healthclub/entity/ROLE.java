@@ -1,6 +1,7 @@
 package com.CMPE202.healthclub.entity;
 
 public enum ROLE {
-    USER,
-    ADMIN
+    STAFF,
+    MEMBER,
+    FREE_TRIAL_MEMBER
 }

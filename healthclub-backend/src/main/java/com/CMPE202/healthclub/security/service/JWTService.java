@@ -1,5 +1,6 @@
 package com.CMPE202.healthclub.security.service;
 
+import com.CMPE202.healthclub.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,22 +23,25 @@ public class JWTService {
     // 6 hours
     private static final int JWT_VALIDITY_DURATION = 1000*60*60*6;
 
+    private static final String ROLE_KEY_JWT = "role";
+
     public String extractUserName(String jwtToken) {
         return extractClaim(jwtToken, Claims::getSubject);
     }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(User user) {
+        return generateToken(new HashMap<>(), user);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(Map<String, Object> extraClaims, User user) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 // Token valid for 6 hours
                 .setExpiration(new Date(System.currentTimeMillis()+ JWT_VALIDITY_DURATION))
+                .claim(ROLE_KEY_JWT, user.getRole())
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
