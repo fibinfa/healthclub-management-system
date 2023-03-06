@@ -10,7 +10,9 @@ import com.CMPE202.healthclub.repository.UserRepository;
 import com.CMPE202.healthclub.security.service.JWTService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,15 +51,23 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest authRequest) {
-       authenticationManager.authenticate(
-               new UsernamePasswordAuthenticationToken(
-                       authRequest.getEmail(),
-                       authRequest.getPassword()
-               )
-       );
+
+        try{
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequest.getEmail(),
+                            authRequest.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException ex) {
+            throw new IllegalArgumentException("Invalid credentials");
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
        var user = userRepository.
                findUserByEmail(authRequest.getEmail())
-               .orElseThrow(() -> new IllegalArgumentException("Email and password do not match"));
+               .orElseThrow(() -> new IllegalArgumentException("Email not found"));
 
         String jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
