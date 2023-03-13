@@ -31,7 +31,7 @@ public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse registerUser(UserModel userModel) {
+    public void registerUser(UserModel userModel) {
         // Check if email already exists
         String email = userModel.getEmail();
         Optional<User> optionalUser = userRepository.findUserByEmail(email);
@@ -46,8 +46,6 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(userModel.getPassword()))
                 .build();
         userRepository.save(user);
-        String jwtToken = jwtService.generateToken(user);
-        return new AuthenticationResponse(jwtToken);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest authRequest) {
